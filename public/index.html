@@ -24,6 +24,7 @@
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://api.trello.com/1/client.js?key=5ab1491aa3c07f1dda09456bdd7f8b91"></script>
+    <script src="https://greasyfork.org/scripts/2350-filesaver-js/code/filesaverjs.js?version=6255"></script>
 
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
@@ -45,6 +46,7 @@
       <h2>Welcome</h2>
       <h1>Trello Environment Tests</h1>
       <p>You're seeing this because we are testing some fuctions to integrate Trello here!</p>
+      <div>JSON: </div><textarea id="trello_json"></textarea>
       <a href="#" onclick="trelloAuth()">Trello Login</a>
     </div>
     <p id="load">Firebase SDK Loading&hellip;</p>
@@ -87,9 +89,34 @@
         }
       });
 
+      var getCardSuccess = function (data) {
+        const data_to_download = data.map(function(item, i){
+          return {
+            download: item.url,
+            filename: item.id + '_' + item.fileName
+          };
+        });
+        console.log(data_to_download);
+        data_to_download.forEach(function (e) {
+            fetch(e.download)
+              .then(res => res.blob()) // Gets the response and returns it as a blob
+              .then(blob => {
+                saveAs(blob, e.filename);
+            });
+        });
+      }
+
+      var getCardFailure = function (data) {
+        console.log('Failure to get card');
+      }
+
       function trelloAuth() {
         var authenticationSuccess = function() {
           console.log('Successful authentication');
+
+          const trello_json = document.getElementById("trello_json");
+          const card_id = JSON.parse(trello_json.value)['id'];
+          window.Trello.get('cards/' + card_id + '/attachments', getCardSuccess, getCardFailure);
         };
 
         var authenticationFailure = function() {
