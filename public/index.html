@@ -47,6 +47,7 @@
       <h1>Trello Environment Tests</h1>
       <p>You're seeing this because we are testing some fuctions to integrate Trello here!</p>
       <div>JSON: </div><textarea id="trello_json"></textarea>
+      <a href="https://trello.com/1/cards/62ea8856d24a044c785c0315/attachments/62ea8be171bdf31873a4d986/download/image.png" download>Test</a>
       <a href="#" onclick="trelloAuth()">Trello Login</a>
     </div>
     <p id="load">Firebase SDK Loading&hellip;</p>
@@ -89,21 +90,31 @@
         }
       });
 
+      var download_as_blob = function(data) {
+        console.log(data);
+        res = data.blob();
+        saveAs(res, 'test');
+      };
+
       var getCardSuccess = function (data) {
+        console.log(data);
         const data_to_download = data.map(function(item, i){
           return {
             download: item.url,
             filename: item.id + '_' + item.fileName
           };
         });
-        console.log(data_to_download);
-        data_to_download.forEach(function (e) {
-            fetch(e.download)
-              .then(res => res.blob()) // Gets the response and returns it as a blob
-              .then(blob => {
-                saveAs(blob, e.filename);
-            });
-        });
+
+        window.Trello.get('cards/62ea8856d24a044c785c0315/attachments/62ea8be171bdf31873a4d986', download_as_blob, getCardFailure);
+
+        //console.log(data_to_download);
+        //data_to_download.forEach(function (e) {
+        //    fetch('https://cors-proxy.htmldriven.com/?url=' + e.download)
+        //      .then(res => res.blob()) // Gets the response and returns it as a blob
+        //      .then(blob => {
+        //        saveAs(blob, e.filename);
+        //    });
+        //});
       }
 
       var getCardFailure = function (data) {
